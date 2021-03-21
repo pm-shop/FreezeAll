@@ -1,6 +1,6 @@
 <?php
 
-namespace Freezepm;
+namespace Freeze;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
