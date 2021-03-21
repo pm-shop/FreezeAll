@@ -3,3 +3,5 @@ FreezeAll est un plugin permettant d'immobiliser complétement tous les membres 
 
 Commandes : /freezeall [On / Off] [Code]
 Permission : freeze.all
+
+Plugin can be used on a server hack.
