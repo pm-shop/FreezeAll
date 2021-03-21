@@ -95,7 +95,7 @@ class Main extends PluginBase implements Listener
                                 $player->sendPopup($this->getConfig()->get("freezePlayerOff"));
                             }
                         }else{
-                            $player->sendMessage("");
+                            $player->sendMessage("§b[Freeze] §cVous avez oublier de préciser ce que vous voulez faire (".$this->getConfig()->get("codeOn") . " ou ".$this->getConfig()->get("codeOff").")");
                         }
                     }else{
                         $sender->sendMessage("§b[Freeze] §cLa personne n'est pas connecté(e)");
