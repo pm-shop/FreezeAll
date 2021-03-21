@@ -9,9 +9,10 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 
-class main extends PluginBase implements Listener
+class Main extends PluginBase implements Listener
 {
     private $frozen = array();
     private $config;
@@ -20,11 +21,13 @@ class main extends PluginBase implements Listener
         $this->getServer()->getPluginManager()->registerEvents($this,$this);
         @mkdir($this->getDataFolder());
         $config = new Config($this->getDataFolder() . "config.yml" , Config::YAML, array(
-            "codeInvalide" => "§b[Freeze] §cVous devez indiquer un code de vérification valide !",
+            "codeInvalid" => "§b[Freeze] §cVous devez indiquer un code de vérification valide !",
             "freezeOn" => "§b[Freeze] §cLe serveur a ete freeze !",
             "freezeOff" => "§b[Freeze] §aLe serveur a ete unfreeze !",
+            "freezePlayerOn" => "§b[Freeze] §aVous venez d'être gelé(e) !",
+            "freezePlayerOff" => "§b[Freeze] §aVous venez d'être dégelé(e) !",
             "codeOn" => "codeOn",
-            "codeOff" => "codeOff"
+            "codeOff" => "codeOff",
         ));
         $this->saveResource("config.yml");
     }
@@ -55,8 +58,11 @@ class main extends PluginBase implements Listener
                                 foreach ($this->getServer()->getOnlinePlayers() as $all) {
                                     $all->setImmobile(true);
                                     array_push($this->frozen, $all->getName());
-                                    $sender->setImmobile(false);
                                     $all->sendPopup($this->getConfig()->get("freezeOn"));
+
+                                    // Retirer le freezeur de la liste
+                                    $sender->setImmobile(false);
+                                    unset($this->frozen[array_search($sender->getName(),$this->frozen)]);
                                 }
                             }
                         } elseif ($args[0] == "off"){
@@ -74,10 +80,33 @@ class main extends PluginBase implements Listener
                 } else {
                     $sender->sendMessage("§b[Freeze] §cVous devez indiquer on/off");
                 }
+            }else if($command == "freeze"){
+                if(isset($args[0])){
+                    $player = Server::getInstance()->getPlayer($args[0]);
+                    if($player instanceof Player){
+                        if(isset($args[1])){
+                            if($args[1] == $this->getConfig()->get("codeOn")){
+                                array_push($this->frozen, $player->getName());
+                                $player->setImmobile(true);
+                                $player->sendPopup($this->getConfig()->get("freezePlayerOn"));
+                            }else{
+                                unset($this->frozen[array_search($player->getName(),$this->frozen)]);
+                                $player->setImmobile(false);
+                                $player->sendPopup($this->getConfig()->get("freezePlayerOff"));
+                            }
+                        }else{
+                            $player->sendMessage("");
+                        }
+                    }else{
+                        $sender->sendMessage("§b[Freeze] §cLa personne n'est pas connecté(e)");
+                    }
+                }else{
+                    $sender->sendMessage("§b[Freeze] §cVous n'avez pas indiquer le joueur à freeeze");
+                }
             }
-
         } else {
             $this->getLogger()->info("Vous n'etes pas un joueur !");
-        }return true;
+        }
+        return true;
     }
 }
